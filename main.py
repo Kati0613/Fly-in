@@ -1,4 +1,4 @@
-from MapReader import MapReader
+from ProcessMap import ProcessMap
 
 if __name__ == "__main__":
-    reader = MapReader("maps/easy/01_linear_path.txt")
+    reader = ProcessMap("maps/easy/01_linear_path.txt")
