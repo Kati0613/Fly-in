@@ -1,8 +1,8 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class HubModel(BaseModel):
-    name: str
+    name: str = Field(pattern=r"^[^- ]+$")
     x: int
     y: int
     metadata: str
