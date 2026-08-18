@@ -1,14 +1,31 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, PositiveInt, ConfigDict
+from typing import Literal
+#start potrzebuje i end troche innego pydantica
+
+class HubMetadata(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    zone: Literal["normal", "blocked", "restricted", "priority"] = "normal"
+    color: str | None = None
+    max_drones: PositiveInt | None = 1
+
+
+class ConnectionMetadata(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    max_link_capacity: PositiveInt | None = 1
 
 
 class HubModel(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     name: str = Field(pattern=r"^[^- ]+$")
     x: int
     y: int
-    metadata: str
-    other_data: None
+    metadata: HubMetadata | None
+
 
 class ConnectionModel(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     connection: str
-    metadata: str
-    other_data: None
+    metadata: ConnectionMetadata | None

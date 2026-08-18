@@ -1,4 +1,5 @@
-#check connections
+from Hub import Hub
+from Connection import Connection
 
 class ProcessMap:
     def __init__(self, map_file):
@@ -43,15 +44,32 @@ class ProcessMap:
                         continue
 
                     if "start_hub:" == splitted_line[0]:
-                        self.validate_start_end(splitted_line[0])
+                        self.validate_start_end(splitted_line[0],
+                                                splitted_line[1])
+                        metadata = self.procces_metadata(splitted_line[4:])
+                        self.start_hub = Hub(splitted_line[1],
+                                             splitted_line[2],
+                                             splitted_line[3], metadata,
+                                             False, True)
                     elif "end_hub:" == splitted_line[0]:
-                        self.validate_start_end(splitted_line[0])
+                        self.validate_start_end(splitted_line[0],
+                                                splitted_line[1])
+                        metadata = self.procces_metadata(splitted_line[4:])
+                        self.end_hub = Hub(splitted_line[1], splitted_line[2],
+                                           splitted_line[3], metadata,
+                                           False, True)
                     elif splitted_line[0] == "hub:":
                         self.validate_names(splitted_line[1])
-                        self.hubs.append(splitted_line)
+                        metadata = self.procces_metadata(splitted_line[4:])
+                        self.hubs.append(Hub(splitted_line[1],
+                                             splitted_line[2],
+                                             splitted_line[3], metadata))
                     elif splitted_line[0] == "connection:":
                         self.validate_connection(splitted_line[1])
-                        self.connections.append(splitted_line)
+                        metadata = self.procces_metadata(splitted_line[2:])
+                        self.connections.append(Connection(
+                            splitted_line[1], metadata
+                        ))
                     else:
                         raise ValueError(
                             f"""{splitted_line[0]} is not a valid parameter.
@@ -71,16 +89,14 @@ class ProcessMap:
                 "end_hub and enough connections"
                 )
 
-    def validate_start_end(self, name):
-        if "start_hub:" in name and self.start_hub == "":
+    def validate_start_end(self, obj_name, name):
+        if "start_hub:" in obj_name and self.start_hub == "":
             self.validate_names(name)
-            self.start_hub = name
-        elif "start_hub:" in name and self.start_hub != "":
+        elif "start_hub:" in obj_name and self.start_hub != "":
             raise ValueError("Map should have only one start hub")
-        elif "end_hub:" in name and self.end_hub == "":
+        elif "end_hub:" in obj_name and self.end_hub == "":
             self.validate_names(name)
-            self.end_hub = name
-        elif "end_hub:" in name and self.start_hub != "":
+        elif "end_hub:" in obj_name and self.start_hub != "":
             raise ValueError("Map should have only one end hub")
 
     def validate_names(self, name):
@@ -114,4 +130,32 @@ class ProcessMap:
                     "Invalid connection. There should be no dupplicate."
                 )
             self.unique_connections.append(connection)
+
+    def procces_metadata(self, metadata):
+        metadata = " ".join(metadata)
+        if metadata is None or metadata == "":
+            return None
+
+        pairs = []
+        if (metadata[0] != "[" or metadata[-1] != "]"):
+            raise ValueError("Provide a proper metadata. It should be in []")
+        else:
+            metadata = metadata[1:-1].split()
+            for data in metadata:
+                pair = data.split("=", 1)
+                pairs.append(pair)
+
+        try:
+            proccesed_metadata = dict(pairs)
+        except ValueError:
+            raise ValueError(
+                "Incorrect metadata. "
+                "Remember - all data must have key and value separeted by ="
+            )
+        return proccesed_metadata
+
+
+
+
+
 
