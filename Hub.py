@@ -1,4 +1,3 @@
-from typing import List
 from Models import HubModel
 
 
@@ -13,3 +12,5 @@ class Hub:
         self.x = validated_data.x
         self.y = validated_data.y
         self.metadata = validated_data.metadata
+        self.start = start
+        self.end = end

@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field, PositiveInt, ConfigDict
 from typing import Literal
-#start potrzebuje i end troche innego pydantica
+
 
 class HubMetadata(BaseModel):
     model_config = ConfigDict(extra="forbid")

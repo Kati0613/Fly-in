@@ -1,6 +1,7 @@
 from Hub import Hub
 from Connection import Connection
 
+
 class ProcessMap:
     def __init__(self, map_file):
         self.map_file = map_file
@@ -11,6 +12,11 @@ class ProcessMap:
         self.nb_of_drones = ""
         self.unique_names = dict()
         self.unique_connections = list()
+        self.unique_coords = list()
+        self.min_h = ""
+        self.min_w = ""
+        self.max_h = ""
+        self.max_w = ""
         self.validate_map()
 
     def validate_map(self):
@@ -46,6 +52,7 @@ class ProcessMap:
                     if "start_hub:" == splitted_line[0]:
                         self.validate_start_end(splitted_line[0],
                                                 splitted_line[1])
+                        self.validate_coords(splitted_line[2:4])
                         metadata = self.procces_metadata(splitted_line[4:])
                         self.start_hub = Hub(splitted_line[1],
                                              splitted_line[2],
@@ -54,12 +61,14 @@ class ProcessMap:
                     elif "end_hub:" == splitted_line[0]:
                         self.validate_start_end(splitted_line[0],
                                                 splitted_line[1])
+                        self.validate_coords(splitted_line[2:4])
                         metadata = self.procces_metadata(splitted_line[4:])
                         self.end_hub = Hub(splitted_line[1], splitted_line[2],
                                            splitted_line[3], metadata,
                                            False, True)
                     elif splitted_line[0] == "hub:":
                         self.validate_names(splitted_line[1])
+                        self.validate_coords(splitted_line[2:4])
                         metadata = self.procces_metadata(splitted_line[4:])
                         self.hubs.append(Hub(splitted_line[1],
                                              splitted_line[2],
@@ -131,6 +140,27 @@ class ProcessMap:
                 )
             self.unique_connections.append(connection)
 
+    def validate_coords(self, xy: list):
+        if (xy in self.unique_coords):
+            raise ValueError("Coords should be unique.")
+        else:
+            if self.max_w == "":
+                self.max_w = xy[0]
+                self.max_h = xy[1]
+                self.max_w = xy[0]
+                self.min_h = xy[1]
+            if self.max_w > xy[0]:
+                self.max_w = xy[0]
+            elif self.min_w < xy[0]:
+                self.min_w = xy[0]
+
+            if self.max_h > xy[1]:
+                self.max_h = xy[1]
+            elif self.min_h < xy[1]:
+                self.min_h = xy[1]
+
+        self.unique_coords.append(xy)
+
     def procces_metadata(self, metadata):
         metadata = " ".join(metadata)
         if metadata is None or metadata == "":
@@ -154,8 +184,5 @@ class ProcessMap:
             )
         return proccesed_metadata
 
-
-
-
-
-
+    def get_width_height(self):
+        return ((self.max_w - self.min_w + 1), (self.max_h - self.min_h + 1))
