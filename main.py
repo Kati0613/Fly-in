@@ -1,4 +1,5 @@
-from ProcessMap import ProcessMap
+from Visualiser import Visualiser
 
 if __name__ == "__main__":
-    reader = ProcessMap("maps/hard/03_ultimate_challenge.txt")
+    game = Visualiser("/nfs/homes/kkulagow/fly-in/maps/hard/01_maze_nightmare.txt")
+    game.run()

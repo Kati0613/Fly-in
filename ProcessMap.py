@@ -7,10 +7,9 @@ class ProcessMap:
         self.map_file = map_file
         self.start_hub = ""
         self.end_hub = ""
-        self.hubs = []
+        self.hubs = dict()
         self.connections = []
         self.nb_of_drones = ""
-        self.unique_names = dict()
         self.unique_connections = list()
         self.unique_coords = list()
         self.min_h = ""
@@ -58,6 +57,7 @@ class ProcessMap:
                                              splitted_line[2],
                                              splitted_line[3], metadata,
                                              False, True)
+                        self.hubs[splitted_line[1]] = self.start_hub
                     elif "end_hub:" == splitted_line[0]:
                         self.validate_start_end(splitted_line[0],
                                                 splitted_line[1])
@@ -66,18 +66,19 @@ class ProcessMap:
                         self.end_hub = Hub(splitted_line[1], splitted_line[2],
                                            splitted_line[3], metadata,
                                            False, True)
+                        self.hubs[splitted_line[1]] = self.end_hub
                     elif splitted_line[0] == "hub:":
                         self.validate_names(splitted_line[1])
                         self.validate_coords(splitted_line[2:4])
                         metadata = self.procces_metadata(splitted_line[4:])
-                        self.hubs.append(Hub(splitted_line[1],
-                                             splitted_line[2],
-                                             splitted_line[3], metadata))
+                        hub = Hub(splitted_line[1], splitted_line[2],
+                                  splitted_line[3], metadata)
+                        self.hubs[splitted_line[1]] = hub
                     elif splitted_line[0] == "connection:":
-                        self.validate_connection(splitted_line[1])
+                        huba, hubb = self.validate_connection(splitted_line[1])
                         metadata = self.procces_metadata(splitted_line[2:])
                         self.connections.append(Connection(
-                            splitted_line[1], metadata
+                            huba, hubb, metadata
                         ))
                     else:
                         raise ValueError(
@@ -90,9 +91,9 @@ class ProcessMap:
                 "Map file not found. Please provide a valid map file.")
 
         if (self.start_hub == "" or self.end_hub == ""
-            or len(self.connections) < (len(self.hubs) + 1)
-            or len(self.connections) > ((len(self.hubs) + 2)
-                                        * (len(self.hubs) + 1))/2):
+            or len(self.connections) < (len(self.hubs)  - 1)
+            or len(self.connections) > ((len(self.hubs))
+                                        * (len(self.hubs) - 1))/2):
             raise ValueError(
                 "You must provide atleast one start_hub, "
                 "end_hub and enough connections"
@@ -109,9 +110,7 @@ class ProcessMap:
             raise ValueError("Map should have only one end hub")
 
     def validate_names(self, name):
-        if not self.unique_names.get(name):
-            self.unique_names[name] = 1
-        else:
+        if self.hubs.get(name):
             raise ValueError("Your name must be unique")
         if "-" in name or " " in name:
             raise ValueError(
@@ -124,11 +123,11 @@ class ProcessMap:
         huba = connection[0:connection.find("-")]
         hubb = connection[connection.find("-")+1:]
 
-        if not self.unique_names.get(huba) and not self.unique_names.get(hubb):
+        if not (self.hubs.get(huba) and self.hubs.get(hubb)):
             raise ValueError(
                 "Invalid connection. Use a proper hub names or add a new ones."
             )
-        elif self.unique_names.get(huba) and self.unique_names.get(hubb):
+        else:
             if connection in self.unique_connections:
                 raise ValueError(
                     "Invalid connection. There should be no dupplicate."
@@ -139,25 +138,29 @@ class ProcessMap:
                     "Invalid connection. There should be no dupplicate."
                 )
             self.unique_connections.append(connection)
+            return huba, hubb
 
     def validate_coords(self, xy: list):
         if (xy in self.unique_coords):
             raise ValueError("Coords should be unique.")
         else:
+            xy[0] = int(xy[0])
+            xy[1] = int(xy[1])
             if self.max_w == "":
                 self.max_w = xy[0]
                 self.max_h = xy[1]
-                self.max_w = xy[0]
-                self.min_h = xy[1]
-            if self.max_w > xy[0]:
-                self.max_w = xy[0]
-            elif self.min_w < xy[0]:
                 self.min_w = xy[0]
-
-            if self.max_h > xy[1]:
-                self.max_h = xy[1]
-            elif self.min_h < xy[1]:
                 self.min_h = xy[1]
+            else:
+                if self.max_w < xy[0]:
+                    self.max_w = xy[0]
+                elif self.min_w > xy[0]:
+                    self.min_w = xy[0]
+
+                if self.max_h < xy[1]:
+                    self.max_h = xy[1]
+                elif self.min_h > xy[1]:
+                    self.min_h = xy[1]
 
         self.unique_coords.append(xy)
 
