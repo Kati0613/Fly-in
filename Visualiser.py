@@ -4,7 +4,7 @@ from ProcessMap import ProcessMap
 
 class Visualiser():
 
-    def __init__(self, map_file="/nfs/homes/kkulagow/fly-in/maps/hard/01_maze_nightmare.txt"):
+    def __init__(self, map_file="/nfs/homes/kkulagow/fly-in/maps/easy/01_linear_path.txt"):
         pygame.init()
         self.map = ProcessMap(map_file)
         self.hub_width, self.hub_height = self.map.get_width_height()

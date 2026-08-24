@@ -78,7 +78,7 @@ class ProcessMap:
                         huba, hubb = self.validate_connection(splitted_line[1])
                         metadata = self.procces_metadata(splitted_line[2:])
                         self.connections.append(Connection(
-                            huba, hubb, metadata
+                            self.hubs[huba], self.hubs[hubb], metadata
                         ))
                     else:
                         raise ValueError(
