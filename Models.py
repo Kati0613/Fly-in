@@ -27,5 +27,4 @@ class HubModel(BaseModel):
 class ConnectionModel(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    connection: str
     metadata: ConnectionMetadata | None
