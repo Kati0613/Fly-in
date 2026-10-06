@@ -18,7 +18,12 @@ class Visualiser():
         self.calculate_topcorner()
         self.draw_map()
         
+        self.calculate_topcorner()
+        self.draw_map()
+        
     def calculate_topcorner(self):
+        spacing_w = (self.width) / (self.hub_width)
+        spacing_h = (self.height) / (self.hub_height)
         spacing_w = (self.width) / (self.hub_width)
         spacing_h = (self.height) / (self.hub_height)
         self.spacing = min(spacing_w, spacing_h)

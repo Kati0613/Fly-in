@@ -69,6 +69,7 @@ class ProcessMap:
                                            splitted_line[3], metadata,
                                            False, True)
                         self.hubs[splitted_line[1]] = self.end_hub
+                        self.hubs[splitted_line[1]] = self.end_hub
                     elif splitted_line[0] == "hub:":
                         self.validate_names(splitted_line[1])
                         self.validate_coords(splitted_line[2:4])
@@ -76,7 +77,11 @@ class ProcessMap:
                         hub = Hub(splitted_line[1], splitted_line[2],
                                   splitted_line[3], metadata)
                         self.hubs[splitted_line[1]] = hub
+                        hub = Hub(splitted_line[1], splitted_line[2],
+                                  splitted_line[3], metadata)
+                        self.hubs[splitted_line[1]] = hub
                     elif splitted_line[0] == "connection:":
+                        huba, hubb = self.validate_connection(splitted_line[1])
                         huba, hubb = self.validate_connection(splitted_line[1])
                         metadata = self.procces_metadata(splitted_line[2:])
                         self.connections[splitted_line[1]] = Connection(
@@ -93,6 +98,9 @@ class ProcessMap:
                 "Map file not found. Please provide a valid map file.")
 
         if (self.start_hub == "" or self.end_hub == ""
+            or len(self.connections) < (len(self.hubs)  - 1)
+            or len(self.connections) > ((len(self.hubs))
+                                        * (len(self.hubs) - 1))/2):
             or len(self.connections) < (len(self.hubs)  - 1)
             or len(self.connections) > ((len(self.hubs))
                                         * (len(self.hubs) - 1))/2):
@@ -113,6 +121,7 @@ class ProcessMap:
 
     def validate_names(self, name):
         if self.hubs.get(name):
+        if self.hubs.get(name):
             raise ValueError("Your name must be unique")
         if "-" in name or " " in name:
             raise ValueError(
@@ -126,9 +135,11 @@ class ProcessMap:
         hubb = connection[connection.find("-")+1:]
 
         if not (self.hubs.get(huba) and self.hubs.get(hubb)):
+        if not (self.hubs.get(huba) and self.hubs.get(hubb)):
             raise ValueError(
                 "Invalid connection. Use a proper hub names or add a new ones."
             )
+        else:
         else:
             if connection in self.unique_connections:
                 raise ValueError(
@@ -141,6 +152,7 @@ class ProcessMap:
                 )
             self.unique_connections.append(connection)
             return huba, hubb
+            return huba, hubb
 
     def validate_coords(self, xy: list):
         if (xy in self.unique_coords):
@@ -148,9 +160,12 @@ class ProcessMap:
         else:
             xy[0] = int(xy[0])
             xy[1] = int(xy[1])
+            xy[0] = int(xy[0])
+            xy[1] = int(xy[1])
             if self.max_w == "":
                 self.max_w = xy[0]
                 self.max_h = xy[1]
+                self.min_w = xy[0]
                 self.min_w = xy[0]
                 self.min_h = xy[1]
             else:
@@ -158,7 +173,16 @@ class ProcessMap:
                     self.max_w = xy[0]
                 elif self.min_w > xy[0]:
                     self.min_w = xy[0]
+            else:
+                if self.max_w < xy[0]:
+                    self.max_w = xy[0]
+                elif self.min_w > xy[0]:
+                    self.min_w = xy[0]
 
+                if self.max_h < xy[1]:
+                    self.max_h = xy[1]
+                elif self.min_h > xy[1]:
+                    self.min_h = xy[1]
                 if self.max_h < xy[1]:
                     self.max_h = xy[1]
                 elif self.min_h > xy[1]:

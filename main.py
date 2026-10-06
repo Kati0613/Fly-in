@@ -1,5 +1,7 @@
 from Visualiser import Visualiser
+from Visualiser import Visualiser
 from ProcessMap import ProcessMap
+from Graph import Graph
 from Graph import Graph
 
 if __name__ == "__main__":
